@@ -15,3 +15,9 @@ Having found these two links:
 
 It appears that `reactiveTimer` in R will let us create a framerate/regular updates. And that Shiny can use JavaScript to listen for key presses/action. This is sufficient for us to develop a template from. This repo is our game template.
 
+# Working prototype
+Simplest_game.R is the simplest game we have created. The arrow keys can be used to move the dot around the screen.
+
+However, the plot speed is very slow. Hence interactivity is no where close to realtime. Delays of 5 seconds between user input (e.g. holding down the left arrow key for 2 seconds) and output (the dot moving across the screen to the left) were not uncommon.
+
+This issue is caused by plotting. The listener template responds to key-up and key-down events without noticible delay. So keyboard input/output is not the issue. Without faster output/plotting our game template is of little use.
