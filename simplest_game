@@ -1,0 +1,88 @@
+library(shiny)
+library(ggplot2)
+
+## Globals ----
+TARGET_FRAME_RATE = 10 # frames per second
+X_START = 0
+Y_START = 0
+X_LIM = c(-5,5)
+Y_LIM = c(-5,5)
+SPEED = 1 # plot-unit per second
+
+## UI ----
+ui = bootstrapPage(
+  verbatimTextOutput("results"),
+  
+  plotOutput("game_window"),
+  
+  ## keydown
+  tags$script('
+    downKeyCount = 0;
+    $(document).on("keydown", function (e) {
+       Shiny.onInputChange("downKey", downKeyCount++);
+       Shiny.onInputChange("downKeyId", e.code);
+    });'
+  ),
+  
+  ## keyup
+  tags$script('
+    upKeyCount = 0;
+    $(document).on("keyup", function (e) {
+       Shiny.onInputChange("upKey", upKeyCount++);
+       Shiny.onInputChange("upKeyId", e.code);
+    });'
+  )
+  
+)
+
+## SERVER ----
+server = function(input, output, session){
+  ## key management ----
+  keyRecords = reactiveValues()
+  
+  output$results = renderPrint({ 
+    keys = reactiveValuesToList(keyRecords);
+    names(keys[unlist(keys)]);
+  })
+  
+  observeEvent(input$downKey, { keyRecords[[input$downKeyId]] = TRUE });
+  observeEvent(input$upKey, { keyRecords[[input$upKeyId]] = FALSE });
+  
+  ## visual output ----
+  session = reactiveValues()
+  session$player_x = X_START
+  session$player_y = Y_START
+  session$timer = reactiveTimer(floor(1000 / TARGET_FRAME_RATE))
+  
+  output$game_window = renderPlot({ req(session$p); session$p })
+  observeEvent(session$timer(),{ update_state(); update_view() })
+  
+  
+  update_state = function(){
+    req(session)
+    req(keyRecords)
+    
+    active_keys = reactiveValuesToList(keyRecords);
+    active_keys = names(active_keys[unlist(active_keys)]);
+    
+    session$player_x = session$player_x +
+      ifelse("ArrowRight" %in% active_keys, 1, 0) * SPEED / TARGET_FRAME_RATE +
+      ifelse("ArrowLeft" %in% active_keys, -1, 0) * SPEED / TARGET_FRAME_RATE
+    
+    session$player_y = session$player_y + 
+      ifelse("ArrowUp" %in% active_keys, 1, 0) * SPEED / TARGET_FRAME_RATE +
+      ifelse("ArrowDown" %in% active_keys, -1, 0) * SPEED / TARGET_FRAME_RATE
+  }
+  
+  update_view = function(){
+    req(session)
+  
+    session$p = ggplot() +
+      geom_point(aes(x = session$player_x, y = session$player_y)) +
+      xlim(X_LIM) +
+      ylim(Y_LIM)
+  }
+  
+}
+
+shinyApp(ui = ui, server = server)
