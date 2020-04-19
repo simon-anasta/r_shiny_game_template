@@ -13,5 +13,5 @@ Having found these two links:
 1. https://nhsrcommunity.com/blog/animating-a-graph-over-time-in-shiny/
 2. https://stackoverflow.com/questions/24973549/r-shiny-key-input-binding/61297911#61297911
 
-It appears that `reactiveTimer` in R will let us create a framerate/regular updates. And that Shiny can use JavaScript to listen for key presses/action. This is sufficient for us to develop from.
+It appears that `reactiveTimer` in R will let us create a framerate/regular updates. And that Shiny can use JavaScript to listen for key presses/action. This is sufficient for us to develop a template from. This repo is our game template.
 
