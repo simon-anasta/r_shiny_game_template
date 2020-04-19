@@ -3,21 +3,7 @@ library(shiny)
 ui = bootstrapPage(
   verbatimTextOutput("results"),
   
-  # ## keydown - includes shift-etc
-  # tags$script('
-  #   $(document).on("keydown", function (e) {
-  #      Shiny.onInputChange("downKeyId", e.code);
-  #   });
-  # '),
-  # 
-  # ## keyup - includes shift-etc
-  # tags$script('
-  #   $(document).on("keyup", function (e) {
-  #      Shiny.onInputChange("upKeyId", e.code);
-  #   });
-  # ')
-  
-  ## keydown - multi-key
+  ## keydown
   tags$script('
     downKeyCount = 0;
     $(document).on("keydown", function (e) {
@@ -26,7 +12,7 @@ ui = bootstrapPage(
     });'
   ),
   
-  ## keyup - multi-key
+  ## keyup
   tags$script('
     upKeyCount = 0;
     $(document).on("keyup", function (e) {
@@ -41,15 +27,12 @@ server = function(input, output, session){
   keyRecords = reactiveValues()
   
   output$results = renderPrint({ 
-    keys = reactiveValuesToList(keyRecords)
-    names(keys[unlist(keys)]) 
+    keys = reactiveValuesToList(keyRecords);
+    names(keys[unlist(keys)]);
   })
   
-  # observeEvent(input$downKeyId, { keyRecords[[input$downKeyId]] = TRUE });
-  # observeEvent(input$upKeyId, { keyRecords[[input$upKeyId]] = FALSE })
-  
   observeEvent(input$downKey, { keyRecords[[input$downKeyId]] = TRUE });
-  observeEvent(input$upKey, { keyRecords[[input$upKeyId]] = FALSE })
+  observeEvent(input$upKey, { keyRecords[[input$upKeyId]] = FALSE });
 }
 
 shinyApp(ui = ui, server = server)
