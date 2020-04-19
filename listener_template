@@ -3,54 +3,53 @@ library(shiny)
 ui = bootstrapPage(
   verbatimTextOutput("results"),
   
-  ## keypress - ignores shift-etc, lower & upper case differ
+  # ## keydown - includes shift-etc
   # tags$script('
-  #   $(document).on("keypress", function (e) {
-  #      Shiny.onInputChange("mydata", e.code);
+  #   $(document).on("keydown", function (e) {
+  #      Shiny.onInputChange("downKeyId", e.code);
   #   });
-  # ')
-  
-  ## keydown - includes shift-etc
-  tags$script('
-    $(document).on("keydown", function (e) {
-       Shiny.onInputChange("mydata", e.code);
-    });
-  ')
-  
-  ## keyup - includes shift-etc
+  # '),
+  # 
+  # ## keyup - includes shift-etc
   # tags$script('
   #   $(document).on("keyup", function (e) {
-  #      Shiny.onInputChange("mydata", e.code);
+  #      Shiny.onInputChange("upKeyId", e.code);
   #   });
   # ')
   
   ## keydown - multi-key
-  # tags$script('
-  #   pressedKeyCount = 0;
-  #   $(document).on("keydown", function (e) {
-  #      Shiny.onInputChange("pressedKey", pressedKeyCount++);
-  #      Shiny.onInputChange("pressedKeyId", e.which);
-  #   });'
-  # )
+  tags$script('
+    downKeyCount = 0;
+    $(document).on("keydown", function (e) {
+       Shiny.onInputChange("downKey", downKeyCount++);
+       Shiny.onInputChange("downKeyId", e.code);
+    });'
+  ),
   
+  ## keyup - multi-key
+  tags$script('
+    upKeyCount = 0;
+    $(document).on("keyup", function (e) {
+       Shiny.onInputChange("upKey", upKeyCount++);
+       Shiny.onInputChange("upKeyId", e.code);
+    });'
+  )
   
 )
 
 server = function(input, output, session){
-  ## listener for sinlge key
-  output$results = renderPrint({ input$mydata })
+  keyRecords = reactiveValues()
   
-  ## listener for multiple keys
-  # values = reactiveValues()
-  # output$results = renderPrint({ values$numClick })
-  # 
-  # observeEvent(input$pressedKey, {
-  #   if(input$pressedKeyId >= 49 && input$pressedKeyId <= 57){ # numbers
-  #     # values$numClick <- (input$pressedKeyId - 48);
-  #     values$numClick[input$pressedKeyId - 48] = input$pressedKeyId - 48;
-  #   }
-  # });
+  output$results = renderPrint({ 
+    keys = reactiveValuesToList(keyRecords)
+    names(keys[unlist(keys)]) 
+  })
   
+  # observeEvent(input$downKeyId, { keyRecords[[input$downKeyId]] = TRUE });
+  # observeEvent(input$upKeyId, { keyRecords[[input$upKeyId]] = FALSE })
+  
+  observeEvent(input$downKey, { keyRecords[[input$downKeyId]] = TRUE });
+  observeEvent(input$upKey, { keyRecords[[input$upKeyId]] = FALSE })
 }
 
 shinyApp(ui = ui, server = server)
