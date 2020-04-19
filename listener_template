@@ -1,0 +1,56 @@
+library(shiny)
+
+ui = bootstrapPage(
+  verbatimTextOutput("results"),
+  
+  ## keypress - ignores shift-etc, lower & upper case differ
+  # tags$script('
+  #   $(document).on("keypress", function (e) {
+  #      Shiny.onInputChange("mydata", e.code);
+  #   });
+  # ')
+  
+  ## keydown - includes shift-etc
+  tags$script('
+    $(document).on("keydown", function (e) {
+       Shiny.onInputChange("mydata", e.code);
+    });
+  ')
+  
+  ## keyup - includes shift-etc
+  # tags$script('
+  #   $(document).on("keyup", function (e) {
+  #      Shiny.onInputChange("mydata", e.code);
+  #   });
+  # ')
+  
+  ## keydown - multi-key
+  # tags$script('
+  #   pressedKeyCount = 0;
+  #   $(document).on("keydown", function (e) {
+  #      Shiny.onInputChange("pressedKey", pressedKeyCount++);
+  #      Shiny.onInputChange("pressedKeyId", e.which);
+  #   });'
+  # )
+  
+  
+)
+
+server = function(input, output, session){
+  ## listener for sinlge key
+  output$results = renderPrint({ input$mydata })
+  
+  ## listener for multiple keys
+  # values = reactiveValues()
+  # output$results = renderPrint({ values$numClick })
+  # 
+  # observeEvent(input$pressedKey, {
+  #   if(input$pressedKeyId >= 49 && input$pressedKeyId <= 57){ # numbers
+  #     # values$numClick <- (input$pressedKeyId - 48);
+  #     values$numClick[input$pressedKeyId - 48] = input$pressedKeyId - 48;
+  #   }
+  # });
+  
+}
+
+shinyApp(ui = ui, server = server)
