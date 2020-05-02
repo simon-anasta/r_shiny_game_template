@@ -15,9 +15,18 @@ Having found these two links:
 
 It appears that `reactiveTimer` in R will let us create a framerate/regular updates. And that Shiny can use JavaScript to listen for key presses/action. This is sufficient for us to develop a template from. This repo is our game template.
 
+This works, but the next challenge is that  plot speed is very slow, making realtime interaction impossible. Delays of 15 seconds between user input (e.g. holding down the left arrow key for 2 seconds) and output (the dot moving across the screen to the left) were common in our initial attempt.
+
+Significant speed ups obtained by:
+
+1. Using a canvas, as per https://www.r-bloggers.com/accelerating-ggplot2-use-a-canvas-to-speed-up-rendering-plots/
+2. Only re-plotting when the game-state changes
+
+Most of the improvements come from the second change. User input is checked multiple times a second (we have defaulted to a target refresh rate of 10 Hz). If user input is detected, then it changes the game state and the plot is redrawn.
+
+As a result of this change, the game responds instantly from idle (no user input --> user input). However, continuous input accumulates lag and the game is often slow to return back to idle (continuous user input --> no input).
+
+Given this performance, games that use discrete changes (e.g. each arrow push moves you one square, push three times to move three squares) are likely to perform better than games that use continuous changes (e.g. hold arrow to move smoothly).
+
 # Working prototype
-Simplest_game.R is the simplest game we have created. The arrow keys can be used to move the dot around the screen.
-
-However, the plot speed is very slow. Hence interactivity is no where close to realtime. Delays of 5 seconds between user input (e.g. holding down the left arrow key for 2 seconds) and output (the dot moving across the screen to the left) were not uncommon.
-
-This issue is caused by plotting. The listener template responds to key-up and key-down events without noticible delay. So keyboard input/output is not the issue. Without faster output/plotting our game template is of little use.
+Simplest_game.R is the simplest game we could think of creating. The arrow keys can be used to move the dot around the screen.
