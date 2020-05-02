@@ -53,9 +53,12 @@ server = function(input, output, session){
   session$player_x = X_START
   session$player_y = Y_START
   session$timer = reactiveTimer(floor(1000 / TARGET_FRAME_RATE))
+  session$canvas = ggplot() +
+    xlim(X_LIM) +
+    ylim(Y_LIM) +
+    theme_void()
   
-  output$game_window = renderPlot({ req(session$p); session$p })
-  observeEvent(session$timer(),{ update_state(); update_view() })
+  observeEvent(session$timer(),{ update_state() })
   
   
   update_state = function(){
@@ -74,15 +77,13 @@ server = function(input, output, session){
       ifelse("ArrowDown" %in% active_keys, -1, 0) * SPEED / TARGET_FRAME_RATE
   }
   
-  update_view = function(){
-    req(session)
-  
-    session$p = ggplot() +
-      geom_point(aes(x = session$player_x, y = session$player_y)) +
-      xlim(X_LIM) +
-      ylim(Y_LIM)
-  }
-  
+  output$game_window = renderPlot({ 
+    req(session$canvas)
+    
+    session$canvas + 
+      geom_point(aes(x = session$player_x, y = session$player_y))
+  })
+
 }
 
 shinyApp(ui = ui, server = server)
